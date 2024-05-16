@@ -20,9 +20,13 @@ class EPF_CharacterInventoryStorageComponentSaveData : EPF_BaseInventoryStorageC
 		m_aQuickSlotEntities = {};
 
 		SCR_CharacterInventoryStorageComponent inventoryStorage = SCR_CharacterInventoryStorageComponent.Cast(component);
-		foreach (int idx, IEntity item : inventoryStorage.GetQuickSlotItems())
+		foreach (int idx, auto quickslot: inventoryStorage.GetQuickSlotItems())
 		{
-			string persistentId = EPF_PersistenceComponent.GetPersistentId(item);
+			auto quickslotEntity = SCR_QuickslotEntityContainer.Cast(quickslot);
+			if (!quickslotEntity)
+				continue;
+			
+			string persistentId = EPF_PersistenceComponent.GetPersistentId(quickslotEntity.GetEntity());
 			if (!persistentId) continue;
 
 			EPF_PersistentQuickSlotItem slot();

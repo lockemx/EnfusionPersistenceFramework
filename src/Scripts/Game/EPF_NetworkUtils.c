@@ -23,7 +23,7 @@ class EPF_NetworkUtils
 		if (rplId.IsValid())
 		{
 			RplComponent entityRpl = RplComponent.Cast(Replication.FindItem(rplId));
-			if (entityRpl) entity = IEntity.Cast(entityRpl.GetEntity());
+			if (entityRpl) entity = entityRpl.GetEntity();
 		}
 
 		return entity;

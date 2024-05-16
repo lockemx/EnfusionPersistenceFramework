@@ -56,7 +56,7 @@ class EPF_ComponentFieldBuilder
 	//------------------------------------------------------------------------------------------------
 	EDF_DbFindFieldCollectionHandlingBuilder Field(string fieldPath)
 	{
-		return EDF_DbFindFieldCollectionHandlingBuilder.Cast(m_pBuilder.Field(fieldPath));
+		return m_pBuilder.Field(fieldPath);
 	}
 
 	//------------------------------------------------------------------------------------------------

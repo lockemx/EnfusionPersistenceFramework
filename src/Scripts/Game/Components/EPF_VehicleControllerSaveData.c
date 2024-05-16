@@ -1,4 +1,4 @@
-[EPF_ComponentSaveDataType(VehicleControllerComponent), EPF_ComponentSaveDataType(VehicleControllerComponent_SA), BaseContainerProps()]
+[EPF_ComponentSaveDataType(VehicleControllerComponent), BaseContainerProps()]
 class EPF_VehicleControllerSaveDataClass : EPF_ComponentSaveDataClass
 {
 }
@@ -11,17 +11,8 @@ class EPF_VehicleControllerSaveData : EPF_ComponentSaveData
 	//------------------------------------------------------------------------------------------------
 	override EPF_EReadResult ReadFrom(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
-		VehicleControllerComponent_SA vehicleController_SA = VehicleControllerComponent_SA.Cast(component);
-		if (vehicleController_SA)
-		{
-			m_bEngineOn = vehicleController_SA.IsEngineOn();
-		}
-		else
-		{
-			VehicleControllerComponent vehicleController = VehicleControllerComponent.Cast(component);
-			if (vehicleController)
-				m_bEngineOn = vehicleController.IsEngineOn();
-		}
+		VehicleControllerComponent vehicleController = VehicleControllerComponent.Cast(component);
+		m_bEngineOn = vehicleController.IsEngineOn();
 
 		if (!m_bEngineOn)
 			return EPF_EReadResult.DEFAULT;
@@ -32,18 +23,9 @@ class EPF_VehicleControllerSaveData : EPF_ComponentSaveData
 	//------------------------------------------------------------------------------------------------
 	override EPF_EApplyResult ApplyTo(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
-		VehicleControllerComponent_SA vehicleController_SA = VehicleControllerComponent_SA.Cast(component);
-		if (vehicleController_SA)
-		{
-			if (m_bEngineOn)
-				vehicleController_SA.ForceStartEngine();
-		}
-		else
-		{
-			VehicleControllerComponent vehicleController = VehicleControllerComponent.Cast(component);
-			if (vehicleController && m_bEngineOn)
-				vehicleController.StartEngine();
-		}
+		VehicleControllerComponent vehicleController = VehicleControllerComponent.Cast(component);
+		if (m_bEngineOn)
+			vehicleController.ForceStartEngine();
 
 		return EPF_EApplyResult.OK;
 	}

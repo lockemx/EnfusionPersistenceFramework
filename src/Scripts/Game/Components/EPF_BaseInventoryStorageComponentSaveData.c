@@ -112,7 +112,7 @@ class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 	override EPF_EApplyResult ApplyTo(IEntity owner, GenericComponent component, EPF_ComponentSaveDataClass attributes)
 	{
 		BaseInventoryStorageComponent storageComponent = BaseInventoryStorageComponent.Cast(component);
-		InventoryStorageManagerComponent storageManager = InventoryStorageManagerComponent.Cast(storageComponent.GetOwner().FindComponent(InventoryStorageManagerComponent));
+		InventoryStorageManagerComponent storageManager = InventoryStorageManagerComponent.Cast(owner.FindComponent(InventoryStorageManagerComponent));
 		if (!storageManager) storageManager = EPF_GlobalInventoryStorageManagerComponent.GetInstance();
 
 		bool isNotBaked = !EPF_BitFlags.CheckFlags(EPF_Component<EPF_PersistenceComponent>.Find(owner).GetFlags(), EPF_EPersistenceFlags.BAKED);
@@ -178,9 +178,11 @@ class EPF_BaseInventoryStorageComponentSaveData : EPF_ComponentSaveData
 			if (!slotEntity)
 				return EPF_EApplyResult.ERROR;
 
+			// Teleport to target position so it is within valid range and if insert fails becomes visible overflow
+			EPF_WorldUtils.Teleport(slotEntity, owner.GetOrigin(), owner.GetYawPitchRoll()[0]);
+
 			// Unable to add it to the storage parent, so put it on the ground at the parent origin
-			if (!storageManager.TryInsertItemInStorage(slotEntity, storageComponent, slot.m_iSlotIndex))
-				EPF_WorldUtils.Teleport(slotEntity, storageComponent.GetOwner().GetOrigin(), storageComponent.GetOwner().GetYawPitchRoll()[0]);
+			storageManager.TryInsertItemInStorage(slotEntity, storageComponent, slot.m_iSlotIndex);
 		}
 
 		// Delte any items not found in the storage data for non bakes that always save all slots

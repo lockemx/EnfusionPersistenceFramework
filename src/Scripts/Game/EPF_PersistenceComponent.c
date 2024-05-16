@@ -164,6 +164,12 @@
 		m_iLastSaved = System.GetUnixTime();
 
 		IEntity owner = GetOwner();
+		if (!owner)
+		{
+			Debug.Error("Failed to save entity, because it was already deleted.");
+			return null;
+		}
+		
 		EPF_PersistenceComponentClass settings = EPF_PersistenceComponentClass.Cast(GetComponentData(owner));
 		EPF_EntitySaveData saveData = EPF_EntitySaveData.Cast(settings.m_tSaveDataType.Spawn());
 		
@@ -386,7 +392,7 @@
 		}
 
 		// For vehicles we want to get notified when they encounter their first contact or start to be driven
-		if (settings.m_pSaveData.m_bTrimDefaults && (owner.FindComponent(VehicleControllerComponent) || owner.FindComponent(VehicleControllerComponent_SA)))
+		if (settings.m_pSaveData.m_bTrimDefaults && (owner.FindComponent(VehicleControllerComponent)))
 		{
 			SetEventMask(owner, EntityEvent.CONTACT);
 			EventHandlerManagerComponent ev = EPF_Component<EventHandlerManagerComponent>.Find(owner);
@@ -609,18 +615,9 @@
 	override event protected void EOnPhysicsMove(IEntity owner)
 	{
 		// Check for if engine is one as there is tiny jitter movement during engine startup we want to ignore.
-		VehicleControllerComponent_SA vehicleController_SA = EPF_Component<VehicleControllerComponent_SA>.Find(owner);
-		if (vehicleController_SA)
-		{
-			if (vehicleController_SA.IsEngineOn())
-				FlagAsMoved();
-		}
-		else
-		{
-			VehicleControllerComponent vehicleController = EPF_Component<VehicleControllerComponent>.Find(owner);
-			if (vehicleController && vehicleController.IsEngineOn())
-				FlagAsMoved();
-		}
+		VehicleControllerComponent vehicleController = EPF_Component<VehicleControllerComponent>.Find(owner);
+		if (vehicleController && vehicleController.IsEngineOn())
+			FlagAsMoved();
 	}
 
 	//------------------------------------------------------------------------------------------------

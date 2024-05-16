@@ -195,7 +195,7 @@ class EPF_PersistenceManager
 			}
 		}
 
-		IEntity entity = GetGame().SpawnEntityPrefab(resource, params: spawnParams);
+		IEntity entity = GetGame().SpawnEntityPrefab(resource, null, spawnParams);
 		if (!entity)
 		{
 			Debug.Error(string.Format("Failed to spawn entity '%1:%2'. Ignored.", saveData.Type().ToString(), saveData.GetId()));

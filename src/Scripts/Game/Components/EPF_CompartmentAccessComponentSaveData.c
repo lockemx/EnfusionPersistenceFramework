@@ -75,8 +75,10 @@ class EPF_CompartmentAccessComponentSaveData : EPF_ComponentSaveData
 			compartmentManager.GetCompartments(outCompartments);
 			if (m_iSlotIdx < outCompartments.Count())
 			{
-				compartment.MoveInVehicle(compartmentHolder, outCompartments.Get(m_iSlotIdx));
-				return EPF_EApplyResult.OK;
+				EPF_DeferredApplyResult.AddPending(this, "CompartmentAccessComponentSaveData::GetInVehicle");
+				compartment.GetInVehicle(compartmentHolder, outCompartments.Get(m_iSlotIdx), true, -1, ECloseDoorAfterActions.INVALID, true);
+				GetGame().GetCallqueue().CallLater(Complete, 500);
+				return EPF_EApplyResult.AWAIT_COMPLETION;
 			}
 		}
 
@@ -85,6 +87,11 @@ class EPF_CompartmentAccessComponentSaveData : EPF_ComponentSaveData
 			EPF_WorldUtils.Teleport(owner, currentPos);
 
 		return EPF_EApplyResult.OK;
+	}
+
+	protected void Complete()
+	{
+		EPF_DeferredApplyResult.SetFinished(this, "CompartmentAccessComponentSaveData::GetInVehicle");
 	}
 
 	//------------------------------------------------------------------------------------------------

@@ -36,13 +36,14 @@ modded class SCR_CharacterInventoryStorageComponent
 		array<RplId> rplIds();
 		rplIds.Reserve(m_aQuickSlots.Count());
 
-		foreach (IEntity quickSlotItem : m_aQuickSlots)
+		foreach (auto quickSlot : m_aQuickSlots)
 		{
 			RplId rplId = RplId.Invalid();
 
-			if (quickSlotItem)
+			auto quickslotEntity = SCR_QuickslotEntityContainer.Cast(quickSlot);
+			if (quickslotEntity)
 			{
-				RplComponent replication = RplComponent.Cast(quickSlotItem.FindComponent(RplComponent));
+				auto replication = EPF_Component<RplComponent>.Find(quickslotEntity.GetEntity());
 				if (replication) rplId = replication.Id();
 			}
 
@@ -68,12 +69,21 @@ modded class SCR_CharacterInventoryStorageComponent
 		if (m_aQuickSlotsHistory.Count() < slotsCount)
 			m_aQuickSlotsHistory.Resize(slotsCount);
 
+		Print("EPF_Rpc_UpdateQuickSlotItems");
+		
 		foreach (int idx, RplId rplId : rplIds)
 		{
 			IEntity slotEntity = EPF_NetworkUtils.FindEntityByRplId(rplId);
-			m_aQuickSlots.Set(idx, slotEntity);
+			PrintFormat("idx: %1, rplId:%2, entity:%3", idx, rplId, slotEntity);
+
 			if (slotEntity)
-				m_aQuickSlotsHistory.Set(idx, GetItemType(slotEntity));
+			{
+				super.StoreItemToQuickSlot(slotEntity, idx, true);
+			}
+			else
+			{
+				super.RemoveItemFromQuickSlotAtIndex(idx);
+			}
 		}
 	}
 
@@ -87,6 +97,7 @@ modded class SCR_CharacterInventoryStorageComponent
 	[RplRpc(RplChannel.Reliable, RplRcver.Owner)]
 	protected void Rpc_SetQuickBarItems(array<RplId> quickBarRplIds)
 	{
-		EPF_Rpc_UpdateQuickSlotItems(quickBarRplIds);
+		// Delay to allow items to be loaded. Alt: Wait until all RPL ids are known and keep it in queue on repeat until then
+		GetGame().GetCallqueue().CallLater(EPF_Rpc_UpdateQuickSlotItems, 500, param1: quickBarRplIds);
 	}
 }
